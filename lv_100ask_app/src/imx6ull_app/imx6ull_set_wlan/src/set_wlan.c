@@ -139,7 +139,6 @@ static void lv_task_wlan_scan(lv_timer_t * task)
     do{
         btn = lv_list_add_btn(g_wifi_scan_list, LV_SYMBOL_WIFI, token);
         lv_obj_add_event_cb(btn, wifi_list_event_handler, LV_EVENT_CLICKED, NULL);
-        //printf("[biubiu] %s\n", token);
     }while((token = strtok(NULL, "\n")));
         
     //lv_obj_t * btn = lv_list_add_btn(g_wifi_scan_list, LV_SYMBOL_WIFI, "100ask.net");
@@ -159,7 +158,7 @@ static bool open_wifi(void)
     // 如果未创建则创建，如果已经创建过了直接恢复定时器
     if(g_wifi_scan_task_handle == NULL)
     {
-        g_wifi_scan_task_handle = lv_timer_create(lv_task_wlan_scan, 10000, NULL);  // 10秒定时器任务
+        g_wifi_scan_task_handle = lv_timer_create(lv_task_wlan_scan, 30000, NULL);  // 10秒定时器任务
     }
     else 
     {
@@ -182,16 +181,17 @@ static void switch_event_handler(lv_event_t * e)
         //printf("State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
         if (lv_obj_has_state(obj, LV_STATE_CHECKED))
         {
-            printf("State: ON!!!!\n");
-            if (1 == open_wifi());
-                lv_obj_add_state(obj, LV_STATE_DISABLED);
+            open_wifi();
+            //if (1 == open_wifi());
+                //lv_obj_add_state(obj, LV_STATE_DISABLED);
         }
         else
         {
-            printf("State: OFF!\n");
-            lv_obj_add_state(obj, LV_STATE_CHECKED);
-            lv_timer_pause(g_wifi_scan_task_handle);  // 暂停
-            printf("Wi-Fi sacn timer pause!\n");
+            //lv_obj_add_state(obj, LV_STATE_CHECKED);
+            if(g_wifi_scan_task_handle == NULL)
+                lv_timer_pause(g_wifi_scan_task_handle);  // 暂停
+            if (g_wifi_scan_list)
+                lv_obj_clean(g_wifi_scan_list); // 清空列表，删除对象的所有子项（但不是对象本身）
         }
     }
 }
@@ -230,70 +230,102 @@ static void ta_event_cb(lv_event_t * e)
 }
 
 
-static bool conn_wifi(char * name, char * passwd)
+// mode: 0: 连接历史wifi 1：连接新的wifi
+static bool conn_wifi(char * name, char * passwd, int mode)
 {
     char cmd_buff[256];
     char res_buffer[512] = {0};
     int count = 0, overrun = 3;
 
-
-    // [1] 配置连接参数
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "rm /etc/wpa_supplicant.conf && wpa_passphrase %s %s >> /etc/wpa_supplicant.conf", name, passwd);
-    printf("%s\n", cmd_buff);
-    shell_exec_handle(cmd_buff, NULL);
-    sleep(3);
-    
-    // [2] 判断是否后台已经运行 wpa_supplicant (ps | grep "wpa_supplicant")
-    //memset(cmd_buff, 0, sizeof(cmd_buff));
-    //lv_snprintf(cmd_buff, sizeof(cmd_buff), "ps | grep \"wpa_supplicant\"", "wpa_supplicant");
-    //shell_exec_handle(cmd_buff, NULL);
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "killall -9 wpa_supplicant");  // 连接之前先kill掉wpa_supplicant (这里不检查是否已运行wpa_supplicant)
-    printf("%s\n", cmd_buff);
-    shell_exec_handle(cmd_buff, NULL);
-    sleep(3);
-    
-    // [3] 连接wifi设备
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf");
-    printf("%s\n", cmd_buff);
-    shell_exec_handle(cmd_buff, NULL);
-    sleep(20);
-
-    // [4] 查看连接状态
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "iw wlan0 link");
-    while(shell_exec_handle(cmd_buff, "tx bitrate") != 0)
+    if (1 == mode)
     {
+        // [1] 配置连接参数
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "rm /etc/wpa_supplicant.conf && wpa_passphrase %s %s >> /etc/wpa_supplicant.conf", name, passwd);
         printf("%s\n", cmd_buff);
-        if (count >= 3)
-        {
-            memset(cmd_buff, 0, sizeof(cmd_buff));
-            // rmmod 8723bu && insmod /lib/modules/4.9.88/extra/8723bu.ko && ifconfig wlan0 up
-            lv_snprintf(cmd_buff, sizeof(cmd_buff), \
-                "killall wpa_supplicant && rmmod 8723bu && modprobe 8723bu && ifconfig wlan0 up && \
-                 wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf && iw wlan0 link");
-            
-            count = 0;
-            continue;
-        }
-        if(0 == overrun)    return 0;
+        shell_exec_handle(cmd_buff, NULL);
+        sleep(1);
+        
+        // [2] 判断是否后台已经运行 wpa_supplicant (ps | grep "wpa_supplicant")
+        //memset(cmd_buff, 0, sizeof(cmd_buff));
+        //lv_snprintf(cmd_buff, sizeof(cmd_buff), "ps | grep \"wpa_supplicant\"", "wpa_supplicant");
+        //shell_exec_handle(cmd_buff, NULL);
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "killall -9 wpa_supplicant");  // 连接之前先kill掉wpa_supplicant (这里不检查是否已运行wpa_supplicant)
+        printf("%s\n", cmd_buff);
+        shell_exec_handle(cmd_buff, NULL);
+        sleep(1);
+        
+        // [3] 连接wifi设备
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf");
+        printf("%s\n", cmd_buff);
+        shell_exec_handle(cmd_buff, NULL);
+        //sleep(20);
+        sleep(3);
+
+        // [4] 查看连接状态
         memset(cmd_buff, 0, sizeof(cmd_buff));
         lv_snprintf(cmd_buff, sizeof(cmd_buff), "iw wlan0 link");
-        count++;
-        overrun--;
+        while(shell_exec_handle(cmd_buff, "tx bitrate") != 0)
+        {
+            printf("%s\n", cmd_buff);
+            if (count >= 3)
+            {
+                memset(cmd_buff, 0, sizeof(cmd_buff));
+                // rmmod 8723bu && insmod /lib/modules/4.9.88/extra/8723bu.ko && ifconfig wlan0 up
+                lv_snprintf(cmd_buff, sizeof(cmd_buff), \
+                    "rmmod 8723bu && insmod /lib/modules/4.9.88/extra/8723bu.ko &&\
+                    ifconfig wlan0 up && killall wpa_supplicant &&\
+                    wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf && iw wlan0 link");
+                
+                count = 0;
+                continue;
+            }
+            if(0 == overrun)    return 0;
+            memset(cmd_buff, 0, sizeof(cmd_buff));
+            lv_snprintf(cmd_buff, sizeof(cmd_buff), "iw wlan0 link");
+            count++;
+            overrun--;
+            sleep(1);
+        }
+
+        // [5] 获取ip地址
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        printf("%s\n", cmd_buff);
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "udhcpc -i wlan0");
+        if(0 == shell_exec_handle(cmd_buff, "adding dns"))
+            printf("\n\nudhcpc -i wlan0 ok!\n\n");
+        memset(cmd_buff, 0, sizeof(cmd_buff));
         sleep(3);
     }
+    else if (0 == mode)
+    {
+         // [3] 连接wifi设备
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf");
+        printf("%s\n", cmd_buff);
+        shell_exec_handle(cmd_buff, NULL);
+        sleep(1);
 
-    // [5] 获取ip地址
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    printf("%s\n", cmd_buff);
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "udhcpc -i wlan0");
-    if(0 == shell_exec_handle(cmd_buff, "adding dns"))
-        printf("\n\nudhcpc -i wlan0 ok!\n\n");
-    memset(cmd_buff, 0, sizeof(cmd_buff));
-    sleep(3);
+        // [5] 获取ip地址
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        printf("%s\n", cmd_buff);
+        lv_snprintf(cmd_buff, sizeof(cmd_buff), "udhcpc -i wlan0");
+        if(0 == shell_exec_handle(cmd_buff, "adding dns"))
+            printf("\n\nudhcpc -i wlan0 ok!\n\n");
+        memset(cmd_buff, 0, sizeof(cmd_buff));
+        
+        
+        char ipaddr[16];
+        char wifi_name[32];
+        char btn_name[64];
+        lv_obj_clean(g_wifi_conn_list); // 清空列表，删除对象的所有子项（但不是对象本身）
+        shell_opt_handle("ifconfig wlan0 | grep \"inet \" | awk '{print $2}'", ipaddr); // 获取IP地址
+        shell_opt_handle("cat /etc/wpa_supplicant.conf | grep ssid | awk -F= '{print $2}' | awk -F '[\"]' '{print $2}'", wifi_name); // 获取wifi名称
+        lv_snprintf(btn_name, sizeof(btn_name), "%s  %s", wifi_name, ipaddr);
+        lv_list_add_btn(g_wifi_conn_list, LV_SYMBOL_WIFI, btn_name);
+    }
     
     return 1;
 }
@@ -333,7 +365,7 @@ static void conn_btn_event_handler(lv_event_t * e)
         }
         else
         {
-            if(0 == conn_wifi(wifi_name, lv_textarea_get_text(g_pwd_ta)))
+            if(0 == conn_wifi(wifi_name, lv_textarea_get_text(g_pwd_ta), 1))
             {
                 printf("[ERROR] Connetc fail!!!\n");
             }
@@ -473,6 +505,12 @@ void imx6ull_set_wlan_init(void)
     lv_obj_t * sw = lv_switch_create(obj_layout);
     //lv_obj_align(sw, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
     lv_obj_add_event_cb(sw, switch_event_handler, LV_EVENT_ALL, NULL);
+    if(shell_exec_handle("ip link show | grep wlan0: | awk '{print $9}'", "UP") != 1)
+    {
+        open_wifi();
+        conn_wifi(NULL, NULL, 0);
+        lv_obj_add_state(sw, LV_STATE_CHECKED);
+    }
 
     /*Create wifi connected list*/
     g_wifi_conn_list = lv_list_create(obj_layout);
