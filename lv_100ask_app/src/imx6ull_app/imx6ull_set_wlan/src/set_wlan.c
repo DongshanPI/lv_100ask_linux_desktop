@@ -272,8 +272,7 @@ static bool conn_wifi(char * name, char * passwd)
             memset(cmd_buff, 0, sizeof(cmd_buff));
             // rmmod 8723bu && insmod /lib/modules/4.9.88/extra/8723bu.ko && ifconfig wlan0 up
             lv_snprintf(cmd_buff, sizeof(cmd_buff), \
-                "rmmod 8723bu && insmod /lib/modules/4.9.88/extra/8723bu.ko &&\
-                 ifconfig wlan0 up && killall wpa_supplicant &&\
+                "killall wpa_supplicant && rmmod 8723bu && modprobe 8723bu && ifconfig wlan0 up && \
                  wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf && iw wlan0 link");
             
             count = 0;
