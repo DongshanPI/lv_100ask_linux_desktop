@@ -136,28 +136,31 @@ static bool get_lan_info(void)
     // 获取MAC地址
     memset(cmd_buff, 0, sizeof(cmd_buff));
     memset(result, 0, sizeof(result));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"ether \" | awk '{print $2}'", Lan_info.device);
+    //lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"ether \" | awk '{print $2}'", Lan_info.device);
+    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"HWaddr \" | awk '{print $5}'", Lan_info.device); // ifconfig eth0 | grep "HWaddr " | awk '{print $5}'
     shell_exec_handle(cmd_buff, result);
     lv_snprintf(Lan_info.mac, sizeof(Lan_info.mac), result);
 
     // 获取IP地址
     memset(cmd_buff, 0, sizeof(cmd_buff));
     memset(result, 0, sizeof(result));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"inet \" | awk '{print $2}'", Lan_info.device);
+    //lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"inet \" | awk '{print $2}'", Lan_info.device);
+    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"inet \" | awk -F '[:]'  '{print $2}' | awk  '{print $1}'", Lan_info.device);  // ifconfig eth0 | grep "inet " | awk -F '[:]'  '{print $2}' | awk  '{print $1}'
     shell_exec_handle(cmd_buff, result);
     lv_snprintf(Lan_info.ipaddr, sizeof(Lan_info.ipaddr), result);
     
     // 获取网关
     memset(cmd_buff, 0, sizeof(cmd_buff));
     memset(result, 0, sizeof(result));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ip route show  | grep \"default via \" | awk '{print $3}'");
+    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ip route show  | grep \"default via \" | awk '{print $3}'");  // ip route show  | grep "default via " | awk '{print $3}'
     shell_exec_handle(cmd_buff, result);
     lv_snprintf(Lan_info.gateway, sizeof(Lan_info.gateway), result);
 
     // 获取子网掩码
     memset(cmd_buff, 0, sizeof(cmd_buff));
     memset(result, 0, sizeof(result));
-    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"netmask \" | awk '{print $4}'", Lan_info.device);
+    //lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"netmask \" | awk '{print $4}'", Lan_info.device);  
+    lv_snprintf(cmd_buff, sizeof(cmd_buff), "ifconfig %s | grep \"Mask\" | awk -F '[:]'  '{print $4}'", Lan_info.device);// ifconfig eth0 | grep "Mask" | awk -F '[:]'  '{print $4}'
     shell_exec_handle(cmd_buff, result);
     lv_snprintf(Lan_info.netmask, sizeof(Lan_info.netmask), result);
 
