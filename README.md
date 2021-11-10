@@ -27,7 +27,7 @@ Linux 下输入 `nproc` 命令返回的数字是你机器的线程数
 
 ## 仓库子模块说明
 
-- [x] lv_100ask_demos：百问网 LVGL 示例仓库 (无硬件平台限制，可以在支持LVGL的任意平台编译运行)
+- [x] lv_100ask_demos：百问网 LVGL 示例仓库 (平台无关，可以在支持LVGL的任意平台编译运行)
 - [x] lv_100ask_modules：百问网模块仓库 (此仓库为本项目而设，目的是为了提供一些通用的模块供本项目使用，并减少代码量和项目维护难度)
 - [ ] lv_demos：LVGL 官方的示例(LVGL官方仓库)
 - [x] lv_drivers：用于 LVGL 嵌入式 GUI 库的 TFT 和触摸板驱动程序(LVGL官方仓库)
@@ -38,7 +38,40 @@ Linux 下输入 `nproc` 命令返回的数字是你机器的线程数
 # 项目架构
 
 ## 目录说明
-
+``` shell
+├── assets  # 程序运行所需的资源，二次开发需要将里面的文件copy开发板的文件系统中
+│   ├── icon # 桌面背景和APP图标。需要将icon文件夹copy到主桌面程序的同级目录下，或者可以修改代码，指定资源路径
+│   └── services # DBus服务列表。增加APP后需要参考里面的格式新建服务文件，并将服务文件(不是整个文件夹)copy到dbus服务文件目录下：  /usr/share/dbus-1/servers
+├── lv_100ask_app # APP程序(二次开发新的APP主要在这里添加自己的APP)
+│   └── src
+│       ├── general_app # 平台无关的通用APP
+│       │   ├── general_2048_game # APP程序的目录
+│       │   │   ├── obj # 编译过程输出文件存放在这里(执行后 make clean 会清除)，可执行文件放在项目根目录的 bin 目录下
+│       │   │   └── src	# APP程序代码
+│       │   ├── .......
+│       └── imx6ull_app # 硬件相关的APP
+│           ├── imx6ull_set_lan # APP程序的目录
+│           ├── .......
+├── lv_100ask_demos # 百问网平台无关的通用APP
+│   ├── docs
+│   └── src
+│       ├── lv_100ask_demo_2048
+│       ├── ......
+├── lv_100ask_modules # 百问网模块仓库 (此仓库为本项目而设，目的是为了提供一些通用的模块供本项目使用，并减少代码量和项目维护难度)
+│   ├── docs
+│   └── src
+│       ├── lv_100ask_boot_animation # 开机动画模块
+│       ├── lv_100ask_dbus_handler # DBus消息处理模块
+│       ├── lv_100ask_dbus_message_dispatch # 消息分发模块(目前是桌面主程序专用)
+│       ├── lv_100ask_demo_assistive_touch # 辅助触摸悬浮球模块
+│       └── lv_100ask_demo_init_icon # 桌面图标初始化模块(桌面主程序专用)
+├── lv_demos # LVGL 官方的示例(LVGL官方仓库)
+├── lv_drivers # 用于 LVGL 嵌入式 GUI 库的 TFT 和触摸板驱动程序(LVGL官方仓库)
+├── lvgl # LVGL库，项目基于此仓库(LVGL官方仓库)
+├── lv_lib_png # 显示png图片库(LVGL官方仓库)
+├── bin	# 编译完成后，所有的可执行文件存放在这里(执行后 make clean 会清除)
+└── obj # 桌面程序的编译过程输出文件存放在这里(执行后 make clean 会清除)，可执行文件放在项目根目录的 bin 目录下
+```
 
 # 程序说明
 TODO
