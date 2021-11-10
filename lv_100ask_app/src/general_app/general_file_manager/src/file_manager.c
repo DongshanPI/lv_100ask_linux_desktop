@@ -112,8 +112,16 @@ static void click_menu_item_event_handler(lv_event_t * e)
     char * buff = lv_event_get_user_data(e);
 
     if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Button %s clicked", buff);
-        show_dir(buff);
+        char * file_name[256];
+
+        //LV_LOG_USER("Button %s clicked", buff);
+        if((strcmp(buff, "..") == 0) && (strcmp(buff, "/") != 0))
+        {
+            strip_ext(file_browser_dir); // 去掉最后的 /路径
+            lv_snprintf(file_name, sizeof(file_name), "%s", file_browser_dir);
+            show_dir(file_name);
+        }
+        else show_dir(buff);
     }
 }
 
@@ -142,9 +150,6 @@ static void click_file_event_handler(lv_event_t * e)
                 lv_snprintf(file_name, sizeof(file_name), "%s/%s", file_browser_dir, lv_list_get_btn_text(g_file_list, obj));
         }
 
-        printf("file_is: %s\n", file_name);
-        printf("file_browser_dir: %s\n", file_browser_dir);
-
         if((stat(file_name, &stat_buf) == -1))
 		{
 			LV_LOG_USER("stat error");
@@ -166,13 +171,13 @@ static void shell_opt_handle(const char * cmd, char * result)
     fp=popen(cmd, "r");
     while (fgets(buffer, 128, fp) != NULL)
     {
-        printf("%s", buffer); 
+        //printf("%s", buffer); 
         strcat(result, buffer);
     }
 
     if (pclose(fp) == -1)
     {
-        printf("close failed!");
+        LV_LOG_USER("close failed!");
         return NULL;
         //exit(1); // return -1;
     }
@@ -181,52 +186,55 @@ static void shell_opt_handle(const char * cmd, char * result)
 
 static void show_dir(char * path)
 {
+    //uint32_t i;
+    lv_obj_t * btn;
+    struct stat stat_buf;
     struct dirent **namelist;
-	uint16_t file_n;
-
-    printf("1111:%s\n", path);
+    char str_file_path_name[256];
+	int32_t file_n;
 
 	file_n = scandir(path, &namelist, 0, alphasort);
     if (file_n < 0)
-        LV_LOG_USER("Not found!\n");
+    {
+        LV_LOG_USER("Not found!");
+        return;
+    }
     else
         lv_obj_clean(g_file_list); // 清空列表，删除对象的所有子项（但不是对象本身）
     
-    uint32_t i;
-    lv_obj_t * btn;
-    struct stat stat_buf;
 	for(uint16_t i = 0; i < file_n; i++) {
-		if((stat(namelist[i]->d_name, &stat_buf) == -1))
+        // 获取文件的： 路径+名称
+        memset(str_file_path_name, 0, sizeof(str_file_path_name));
+        lv_snprintf(str_file_path_name, sizeof(str_file_path_name), "%s/%s", path, namelist[i]->d_name); 
+
+        if((stat(str_file_path_name, &stat_buf) == -1))
 		{
 			LV_LOG_USER("stat error");
+            continue;
 		}
-		if(S_ISDIR(stat_buf.st_mode))
+
+        // 识别并展示文件		
+        if ((strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".png") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".PNG") == 0) ||\
+            (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".jpg") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".JPG") == 0) ||\
+            (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".bmp") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".BMP") == 0) ||\
+            (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".gif") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".GIF") == 0))
+            btn = lv_list_add_btn(g_file_list, LV_SYMBOL_IMAGE, namelist[i]->d_name);
+        else if ((strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".mp3") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".MP3") == 0))
+            btn = lv_list_add_btn(g_file_list, LV_SYMBOL_AUDIO, namelist[i]->d_name);
+        else if(S_ISDIR(stat_buf.st_mode))
             btn = lv_list_add_btn(g_file_list, LV_SYMBOL_DIRECTORY, namelist[i]->d_name);
         else
-        {
-            if ((strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".png") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".PNG") == 0) ||\
-                (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".jpg") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".JPG") == 0) ||\
-                (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".bmp") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".BMP") == 0) ||\
-                (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".gif") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".GIF") == 0))
-                btn = lv_list_add_btn(g_file_list, LV_SYMBOL_IMAGE, namelist[i]->d_name);
-            else if ((strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".mp3") == 0) || (strcmp((namelist[i]->d_name + (strlen(namelist[i]->d_name) - 4)) , ".MP3") == 0))
-                btn = lv_list_add_btn(g_file_list, LV_SYMBOL_AUDIO, namelist[i]->d_name);
-            else
-                btn = lv_list_add_btn(g_file_list, LV_SYMBOL_FILE, namelist[i]->d_name);
-        }
+            btn = lv_list_add_btn(g_file_list, LV_SYMBOL_FILE, namelist[i]->d_name);
+
         lv_obj_add_event_cb(btn, click_file_event_handler, LV_EVENT_CLICKED, NULL);
 	}
+    free(namelist);
 
-    //free(namelist);
-    printf("2222:%s\n", file_browser_dir);
     memset(file_browser_dir, 0, sizeof(file_browser_dir));
     strcpy(file_browser_dir, path);
-    printf("333:%s\n", file_browser_dir);
-    //shell_opt_handle("pwd ~", file_browser_dir);
     
-    lv_label_set_text_fmt(g_path_label, LV_SYMBOL_EYE_OPEN" %s", path); 
-
-	//lv_obj_t * btn = lv_list_add_btn(g_file_list, LV_SYMBOL_FILE, " ");
+    // 更新路径信息
+    lv_label_set_text_fmt(g_path_label, LV_SYMBOL_EYE_OPEN" %s", path);
 }
 
 
