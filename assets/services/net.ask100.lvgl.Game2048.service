@@ -1,3 +1,3 @@
 [D-BUS Service]
 Name=net.ask100.lvgl.Game2048
-Exec=/root/general_Game2048
+Exec=/usr/share/100ask_desktop/general_Game2048
