@@ -12,18 +12,18 @@
 
 ## 快速开始
 1. 配置开发环境
-本项目的开发环境为： VMware Workstation + Ubuntu
-如果是学习韦东山嵌入式Linux教程的小伙伴可以跳过这一步
-需要搭建开发环境的请点击连接查看详细教程：xxxxxx
+本项目的开发环境为：` VMware Workstation + Ubuntu` ，
+如果是学习韦东山嵌入式Linux教程的小伙伴可以跳过这一步，
+需要搭建开发环境的请点击连接查看详细教程：xxxxxx 。
 2. 配置交叉编译环境。如果工具链没有配置正确，可能会导致编译不通过，即使编译通过了也不能在目标平台上运行，请注意检查运行环境，编译环境。
 3. 先克隆主仓库：git clone xxxxxxxx
 4. 克隆主仓库后，同步子仓库模块： git submodule update --init --recursive
 5. 后续更新子仓库模块： git submodule update --remote
-6. 进入仓库根目录 `xxxxx` ，执行 `make clean && make` 开始编译
+6. 进入仓库根目录 `xxxxx` ，执行 `make clean && make` 开始编译。
 7. 提升编译速度。全速编译命令： `make clean && make -j$(nproc) RUN_JOBS=-j$(nproc)` 
-"make -j$(nproc)" 的 **16** 是指定编译 **主桌面程序** 的内核线程数
-"RUN_JOBS=j$(nproc)"的 **16** 是指定编译 **APP程序** 的内核线程数
-Linux 下输入 `nproc` 命令返回的数字是你机器的线程数
+"make -j$(nproc)" 的 **$(nproc)** 是指定编译 **主桌面程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
+"RUN_JOBS=j$(nproc)"的 **$(nproc)** 是指定编译 **APP程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
+Linux 下输入 `nproc` 命令返回的数字是你机器的线程数。
 
 ## 仓库子模块说明
 
@@ -37,11 +37,16 @@ Linux 下输入 `nproc` 命令返回的数字是你机器的线程数
 
 # 项目架构
 
+## 项目框图
+
+TODO
+
+
 ## 目录说明
 ``` shell
 ├── assets  # 程序运行所需的资源，二次开发需要将里面的文件copy开发板的文件系统中
-│   ├── icon # 桌面背景和APP图标。需要将icon文件夹copy到主桌面程序的同级目录下，或者可以修改代码，指定资源路径
-│   └── services # DBus服务列表。增加APP后需要参考里面的格式新建服务文件，并将服务文件(不是整个文件夹)copy到dbus服务文件目录下：  /usr/share/dbus-1/servers
+│   ├── icon # 桌面背景和APP图标(默认存放位置：/usr/share/100ask_desktop/assets/icon)。需要将 assets/icon 文件夹复制到主桌面程序的同级目录(默认存放位置：/usr/share/100ask_desktop)下，背景、图标可以替换，注意名称要和之前的一样。
+│   └── services # DBus服务列表。增加APP后需要参考里面的格式新建服务文件，并将服务文件(不是整个文件夹)copy到dbus服务文件目录下：  /usr/share/dbus-1/services/
 ├── lv_100ask_app # APP程序(二次开发新的APP主要在这里添加自己的APP)
 │   └── src
 │       ├── general_app # 平台无关的通用APP
@@ -77,12 +82,22 @@ Linux 下输入 `nproc` 命令返回的数字是你机器的线程数
 TODO
 ## 如何添加自己的程序
 
+参考 `lv_100ask_app/` 在原有基础上追加或创建自己的应用。
+
+1. 参考 `lv_100ask_app/src` 目录创建新的目录
+2. 修改 `lv_100ask_app/lv_100ask_app.h` 包含添加你的应用路径。
+3. 最后需要修改项目根目录的Makefile文件，在 SRC_DIR 变量添加自己创建的应用
+
 
 # 文档(Documentation)
 
+LVGL 文档教程：[http://lvgl.100ask.net/](http://lvgl.100ask.net/)
 
+LVGL 视频教程： TODO
 
 # 技术支持(FAQs)
+
+欢迎来论坛发帖交流：[http://bbs.100ask.net/](http://bbs.100ask.net/)
 
 # Issues
 
@@ -92,10 +107,25 @@ TODO
 # License
 MIT
 
-
-Copyright © 2019-2020 深圳百问网科技有限公司 All Rights Reserved.
+Copyright © 2008-2020 深圳百问网科技有限公司 All Rights Reserved.
 
 
 
 # 关于作者
+- 百问网官网：[http://www.100ask.net](http://www.100ask.net)
+- 百问网官方wiki：[http://wiki.100ask.org](http://wiki.100ask.org)
+- 百问网官方论坛：[http://bbs.100ask.net](http://bbs.100ask.net)
+- 微信公众号：百问科技
+- CSDN：[https://edu.csdn.net/lecturer/90](https://edu.csdn.net/lecturer/90)
+- B站：[https://space.bilibili.com/275908810](https://space.bilibili.com/275908810)
+- 知乎：[https://www.zhihu.com/people/www.100ask/](https://www.zhihu.com/people/www.100ask/)
+- 微博：[https://weibo.com/888wds](https://weibo.com/888wds)
+- 电子发烧友学院：[http://t.elecfans.com/teacher/3.html](http://t.elecfans.com/teacher/3.html)
+
+
+公司名称：深圳百问网科技有限公司
+-  电话: 0755-86200561
+-  技术支持邮箱: weidongshan@qq.com 
+-  地        址: 广东省深圳市龙岗区布吉南湾街道平吉大道建昇大厦B座
+-  邮        编: 518114 
 
