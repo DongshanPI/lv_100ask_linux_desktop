@@ -1,15 +1,16 @@
 [submodule "lv_100ask_demos"]
 	path = lv_100ask_demos
-	url = https://e.coding.net/weidongshan/lv_100ask_demo_project/lv_100ask_demos.git
+	url = https://gitee.com/weidongshan/lv_100ask_demos.git
 [submodule "lv_100ask_modules"]
 	path = lv_100ask_modules
-	url = https://e.coding.net/weidongshan/lv_100ask_demo_project/lv_100ask_modules.git
+	url = https://gitee.com/weidongshan/lv_100ask_modules.git
 [submodule "lv_demos"]
 	path = lv_demos
-	url = https://github.com/lvgl/lv_demos.git
+	url = https://gitee.com/weidongshan/lv_demos.git
 [submodule "lvgl"]
 	path = lvgl
-	url = https://github.com/lvgl/lvgl.git
+	branch = release/v8.1
+	url = https://gitee.com/weidongshan/lvgl.git
 [submodule "lv_drivers"]
 	path = lv_drivers
-	url = https://github.com/lvgl/lv_drivers.git
+	url = https://gitee.com/weidongshan/lv_drivers.git
