@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# ⭐全速编译命令： make clean && make -j16 RUN_JOBS=-j16
+# ⭐全速编译命令： make clean && make -j$(nproc) RUN_JOBS=-j$(nproc)
 
 #CC ?= gcc
 export CC := arm-buildroot-linux-gnueabihf-gcc
@@ -51,9 +51,6 @@ SRC_DIR  +=  lv_100ask_app/src/general_app/general_file_manager\
 			 lv_100ask_app/src/imx6ull_app/imx6ull_set_time\
 			 lv_100ask_app/src/imx6ull_app/imx6ull_set_wlan\
 			 lv_100ask_app/src/imx6ull_app/imx6ull_set_lan
-
-#SRC_DIR  += lv_100ask_app/src/imx6ull_app/imx6ull_set_time
-#SRC_DIR  += lv_100ask_app/src/general_app/general_game_tiles
 
 all: default
 	$(foreach  dir,$(SRC_DIR),make $(RUN_JOBS) -C $(dir);)
