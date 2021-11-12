@@ -8,22 +8,51 @@
 
 100ASK Linux LVGL desktop 是一个 MIT 许可的开源项目。该项目由 [百问网团队](https://www.100ask.net) 研发、发布，目的是为 100ASK_IMX6ULL、100ASK_STM32MP157开发板提供提供一个基础GUI，使用Makefile组织管理源码、基于GCC编译。通过修改少量的配置便在其他Linux、Linux开发板上运行。
 
-项目效果演示视频：
+项目效果演示视频：[https://www.bilibili.com/video/BV1nT4y1R7rz](https://www.bilibili.com/video/BV1nT4y1R7rz)
+
+![https://img-blog.csdnimg.cn/da2dfa5b8a624d8f9390c4f3ad9847fb.jpg](https://img-blog.csdnimg.cn/da2dfa5b8a624d8f9390c4f3ad9847fb.jpg)
 
 ## 快速开始
+
+如果使用的是[百问网IMX6ULL开发板](https://item.taobao.com/item.htm?id=610613585935)，那么你可以通过直接更新固件，最快获得体验。
+
+烧写工具及镜像获取：
+
+- 百度云：链接： [https://pan.baidu.com/s/17QWdasg3lcSb82JK4uUJuQ](https://pan.baidu.com/s/17QWdasg3lcSb82JK4uUJuQ)  提取码： root 
+- 不限速下载地址： [https://download.csdn.net/download/qq_35181236/40774994](https://download.csdn.net/download/qq_35181236/40774994)
+
+或者选择按照下面的章节按步骤开始。
+
+### 编译项目
+
 1. 配置开发环境
-本项目的开发环境为：` VMware Workstation + Ubuntu` ，
-如果是学习韦东山嵌入式Linux教程的小伙伴可以跳过这一步，
-需要搭建开发环境的请点击连接查看详细教程：xxxxxx 。
+    本项目的开发环境为：` VMware Workstation + Ubuntu` ，
+    如果是学习韦东山嵌入式Linux教程的小伙伴可以跳过这一步，
+    需要搭建开发环境的请点击连接查看详细教程：xxxxxx 。
 2. 配置交叉编译环境。如果工具链没有配置正确，可能会导致编译不通过，即使编译通过了也不能在目标平台上运行，请注意检查运行环境，编译环境。
 3. 先克隆主仓库：git clone xxxxxxxx
 4. 克隆主仓库后，同步子仓库模块： git submodule update --init --recursive
 5. 后续更新子仓库模块： git submodule update --remote
 6. 进入仓库根目录 `xxxxx` ，执行 `make clean && make` 开始编译。
 7. 提升编译速度。全速编译命令： `make clean && make -j$(nproc) RUN_JOBS=-j$(nproc)` 
-"make -j$(nproc)" 的 **$(nproc)** 是指定编译 **主桌面程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
-"RUN_JOBS=j$(nproc)"的 **$(nproc)** 是指定编译 **APP程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
-Linux 下输入 `nproc` 命令返回的数字是你机器的线程数。
+    "make -j$(nproc)" 的 **$(nproc)** 是指定编译 **主桌面程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
+    "RUN_JOBS=j$(nproc)"的 **$(nproc)** 是指定编译 **APP程序** 的内核线程数，命令会自动获取系统支持最大的线程数，可以手动指定线程数，如： -j16 ，
+    Linux 下输入 `nproc` 命令返回的数字是你机器的线程数。
+
+### 如何运行
+1. 编译出来的可执行程序会放在项目根目录的 `bin` 目录下，将里面的可执行文件全部传到开发板文件系统中(如家目录)，
+2. 将 `assets/icon` 的 **icon** 目录及其中的所有图片文件传到开发板的文件系统中( **icon** 目录必须和可执行程序在同一级目录)
+3. 修改 `assets/services` 中的所有 `.services` 文件，假如你将可执行文件放在了家目录，那么就改成这样：
+```shell
+[D-BUS Service]
+Name=net.ask100.lvgl.About
+Exec=~/general_About # 原来是这样的Exec=/usr/share/100ask_desktop/general_About
+```
+4. 将修改后 `assets/services`  中的所有 `.services` 文件，复制到开发板的 dbus 服务目录下，本项目的目录是： `/usr/share/dbus-1/services/` 
+5. 在执行之前初始化 dbus 运行环境，执行： export $(dbus-launch)
+6. 修改可执行文件的权限： sudo chmod  +x  ~/*
+7. 最后在可执行文件的目录下执行桌面程序： ./100ask_lvgl_Main 
+8. 尽情享受吧
 
 ## 仓库子模块说明
 
