@@ -34,7 +34,7 @@ all: default
     
 default: $(AOBJS) $(COBJS) $(MAINOBJ)
 	$(CC) -o $(BIN) $(MAINOBJ) $(AOBJS) $(COBJS) $(LDFLAGS)
-	mkdir -p $(LVGL_DIR)/obj
+	mkdir -p obj
 	mv *.o ./obj/
 	mv $(BIN) $(LVGL_DIR)/bin/
 
