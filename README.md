@@ -14,12 +14,12 @@
 
 ## 快速开始
 
-如果使用的是[百问网IMX6ULL开发板](https://item.taobao.com/item.htm?id=610613585935)，那么你可以通过直接更新固件，最快获得体验。
+如果使用的是[百问网STM32MP157开发板](https://item.taobao.com/item.htm?&id=623233533961)，那么你可以通过直接更新固件，最快获得体验。
 
 烧写工具及镜像获取：
 
-- 百度云：链接： [https://pan.baidu.com/s/17QWdasg3lcSb82JK4uUJuQ](https://pan.baidu.com/s/17QWdasg3lcSb82JK4uUJuQ)  提取码： root 
-- 不限速下载地址： [https://download.csdn.net/download/qq_35181236/40774994](https://download.csdn.net/download/qq_35181236/40774994)
+- 百度云：链接： TODO
+- 不限速下载地址： TODO
 
 或者选择按照下面的章节按步骤开始。
 
@@ -56,6 +56,7 @@ Exec=~/general_About # 原来是这样的Exec=/usr/share/100ask_desktop/general_
 7. 尽情享受吧！
 
 #### 开机自启动
+
 1. 在开发板文件系统中新建目录 `/usr/share/100ask_desktop/`
 2. 项目编译出来的可执行程序会放在项目根目录的 `bin` 目录下，将里面的可执行文件全部传到开发板文件系统刚刚新建的目录中： `/usr/share/100ask_desktop/` ，并修改可执行文件的权限： `sudo chmod  +x  /usr/share/100ask_desktop/*`
 3. 将项目 `assets/icon` 的整个 **icon** 目录及其中的所有图片文件传到开发板的文件系统中刚刚新建的目录中： `/usr/share/100ask_desktop/`
